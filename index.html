@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0b100d" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Comandas" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%230b100d'/%3E%3Cellipse cx='50' cy='54' rx='30' ry='36' fill='%237fb069'/%3E%3Cellipse cx='50' cy='56' rx='20' ry='26' fill='%23d7e8b0'/%3E%3Ccircle cx='50' cy='62' r='10' fill='%238a5a2b'/%3E%3C/svg%3E" />
+<title>Comandas Aguacates Bar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0b100d;
+    --bg2:#111813;
+    --card:#16211a;
+    --card2:#1b291f;
+    --line:#2a3a2f;
+    --ink:#f2f5ec;
+    --muted:#a7b8a4;
+    --green:#7fb069;
+    --green-bright:#a3d97e;
+    --gold:#e0a83c;
+    --gold-ink:#1a1405;
+    --red:#e4572e;
+    --radius:14px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ margin:0; padding:0; scroll-padding-bottom:130px; }
+  body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Barlow", system-ui, sans-serif;
+    font-size:17px;
+    line-height:1.35;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  button, input, select{ font-family:inherit; }
+  button{ cursor:pointer; }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:linear-gradient(180deg,#0e150f 0%, #0b100d 100%);
+    border-bottom:2px solid var(--green);
+    padding:10px 14px 0;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .mark{ font-size:30px; line-height:1; }
+  .brand h1{
+    margin:0; font-family:"Barlow Condensed", sans-serif;
+    font-size:26px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+  }
+  .brand h1 span{ color:var(--green-bright); }
+  .brand small{ display:block; font-family:"Barlow",sans-serif; font-size:12.5px; color:var(--gold); letter-spacing:2px; text-transform:uppercase; font-weight:600; }
+  .conn{
+    margin-left:auto; text-align:right; font-size:12.5px; color:var(--muted); font-weight:600;
+  }
+  .conn b{ display:block; font-size:13px; }
+  .conn .on{ color:var(--green-bright); }
+  .conn .off{ color:var(--gold); }
+
+  nav.tabs{ display:flex; gap:8px; margin-top:10px; }
+  nav.tabs button{
+    flex:1; min-height:52px; border:1px solid var(--line); border-bottom:none;
+    background:var(--bg2); color:var(--muted);
+    font-family:"Barlow Condensed",sans-serif; font-size:20px; font-weight:600; letter-spacing:1px;
+    border-radius:12px 12px 0 0; position:relative;
+  }
+  nav.tabs button.active{ background:var(--card); color:var(--ink); box-shadow:inset 0 3px 0 var(--green); }
+  .badge{
+    position:absolute; top:6px; right:10px; min-width:24px; height:24px; padding:0 6px;
+    border-radius:999px; background:var(--red); color:#fff; font-family:"Barlow",sans-serif;
+    font-size:13px; font-weight:800; display:none; align-items:center; justify-content:center;
+  }
+  .badge.show{ display:inline-flex; }
+
+  main{ max-width:860px; margin:0 auto; padding:14px 12px 48px; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---------- Equipo: quién toma la orden ---------- */
+  .who-label, .mesa-label{ font-family:"Barlow Condensed",sans-serif; font-size:19px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin:6px 2px 8px; }
+  .who-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .who-row button{
+    min-height:58px; border-radius:var(--radius); border:2px solid var(--line);
+    background:var(--card); color:var(--ink); font-size:20px; font-weight:700;
+  }
+  .who-row button.sel{ border-color:var(--gold); background:#2a2110; color:var(--gold); }
+  .mesa-input{
+    width:100%; min-height:56px; border-radius:var(--radius); border:2px solid var(--line);
+    background:var(--card); color:var(--ink); font-size:20px; font-weight:600; padding:10px 14px;
+  }
+  .mesa-input:focus{ outline:none; border-color:var(--green); }
+  .who-warn{ display:none; margin-top:10px; background:#3a1410; border:1px solid var(--red); color:#ffb59d; border-radius:10px; padding:10px 12px; font-weight:600; }
+  .who-warn.show{ display:block; }
+
+  /* ---------- Menú ---------- */
+  .section-title{
+    font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700; letter-spacing:1px;
+    text-transform:uppercase; margin:26px 2px 4px; display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after{ content:""; flex:1; height:1px; background:var(--line); }
+  .section-title.star{ color:var(--gold); }
+  .section-note{ color:var(--muted); font-size:14px; margin:0 2px 8px; }
+  .sub-title{ font-weight:800; font-size:18px; margin:14px 2px 6px; color:var(--green-bright); }
+  .item{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:10px 12px; margin-bottom:8px;
+  }
+  .item.has{ border-color:var(--green); background:var(--card2); }
+  .item-row{ display:flex; align-items:center; gap:10px; }
+  .item-info{ flex:1; min-width:0; }
+  .item-name{ font-weight:700; font-size:18px; }
+  .item-detail{ color:var(--muted); font-size:14px; }
+  .item-price{ font-weight:800; font-size:18px; color:var(--gold); white-space:nowrap; }
+  .item-price.tbc{ font-size:13.5px; color:var(--muted); font-weight:600; }
+  .stepper{ display:flex; align-items:center; gap:6px; }
+  .stepper button{
+    width:48px; height:48px; border-radius:12px; border:2px solid var(--line);
+    background:var(--bg2); color:var(--ink); font-size:26px; font-weight:800; line-height:1;
+  }
+  .stepper button.plus{ background:var(--green); border-color:var(--green); color:#0d1508; }
+  .stepper .qty{ min-width:30px; text-align:center; font-size:21px; font-weight:800; }
+  .note-wrap{ display:none; margin-top:10px; }
+  .item.has .note-wrap{ display:block; }
+  .note-wrap input{
+    width:100%; min-height:48px; border-radius:10px; border:1.5px dashed var(--gold);
+    background:#141a10; color:var(--ink); font-size:16.5px; padding:8px 12px;
+  }
+  .note-wrap input::placeholder{ color:#8d9a87; }
+  .note-wrap input:focus{ outline:none; border-style:solid; }
+
+  /* ---------- Barra de envío (sticky) ---------- */
+  .sendbar{
+    margin:22px 0 0; padding:12px;
+    background:var(--card2); border:2px solid var(--green); border-radius:var(--radius);
+    display:flex; align-items:center; gap:12px;
+  }
+  .sendbar .tot{ flex:1; }
+  .sendbar .tot small{ display:block; color:var(--muted); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+  .sendbar .tot b{ font-size:27px; }
+  .sendbar .tot .cnt{ color:var(--muted); font-size:14px; font-weight:600; }
+  #btnSend{
+    min-height:60px; padding:0 26px; border:none; border-radius:14px;
+    background:var(--green); color:#0d1508; font-size:20px; font-weight:800; letter-spacing:.3px;
+  }
+  #btnSend:disabled{ background:#33402f; color:#7d8b78; }
+  #btnClear{
+    min-height:60px; padding:0 14px; border-radius:14px; border:2px solid var(--line);
+    background:transparent; color:var(--muted); font-size:16px; font-weight:700;
+  }
+
+  /* ---------- Barra: comandas ---------- */
+  .empty{
+    text-align:center; color:var(--muted); padding:44px 16px; border:1.5px dashed var(--line);
+    border-radius:var(--radius); font-size:18px; margin-top:14px;
+  }
+  .empty b{ display:block; font-size:21px; color:var(--ink); margin-bottom:4px; }
+  .ticket{
+    background:var(--card); border:1px solid var(--line); border-left:6px solid var(--green);
+    border-radius:var(--radius); padding:14px; margin-bottom:14px;
+  }
+  .ticket.prep{ border-left-color:var(--gold); background:#221d10; }
+  .ticket-head{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .ticket-folio{ font-family:"Barlow Condensed",sans-serif; font-size:27px; font-weight:700; }
+  .ticket-who{ background:#243324; color:var(--green-bright); font-weight:700; padding:3px 10px; border-radius:999px; font-size:15px; }
+  .ticket-mesa{ font-weight:800; font-size:19px; }
+  .ticket-time{ margin-left:auto; color:var(--muted); font-size:14.5px; font-weight:600; }
+  .ticket-status{ font-size:13px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:6px; background:#243324; color:var(--green-bright); }
+  .ticket.prep .ticket-status{ background:#3a2c08; color:var(--gold); }
+  .ticket ul{ list-style:none; margin:12px 0 0; padding:0; }
+  .ticket li{ display:flex; gap:10px; padding:8px 0; border-top:1px solid var(--line); align-items:baseline; }
+  .ticket li .q{ font-weight:800; font-size:19px; color:var(--gold); min-width:38px; }
+  .ticket li .n{ flex:1; font-size:18px; font-weight:600; }
+  .ticket li .p{ font-weight:700; color:var(--muted); white-space:nowrap; }
+  .ticket li .note{
+    display:block; margin-top:3px; background:#2b1503; border:1px solid var(--gold); color:#ffd98a;
+    border-radius:8px; padding:5px 9px; font-size:16px; font-weight:700;
+  }
+  .ticket-total{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:2px solid var(--line); font-size:19px; }
+  .ticket-total b{ font-size:24px; color:var(--gold); }
+  .ticket-actions{ display:flex; gap:10px; margin-top:12px; }
+  .ticket-actions button{ flex:1; min-height:56px; border-radius:12px; font-size:18px; font-weight:800; border:none; }
+  .btn-prep{ background:var(--gold); color:var(--gold-ink); }
+  .btn-done{ background:var(--green); color:#0d1508; }
+  .btn-done:disabled{ background:#33402f; color:#7d8b78; }
+
+  /* ---------- Historial ---------- */
+  .hist-day{
+    display:flex; justify-content:space-between; align-items:center; background:var(--card);
+    border:1px solid var(--gold); border-radius:var(--radius); padding:14px 16px; margin-top:14px;
+  }
+  .hist-day small{ display:block; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-size:13px; font-weight:700; }
+  .hist-day b{ font-size:28px; color:var(--gold); }
+  .hist-item{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-top:10px; color:var(--muted); }
+  .hist-item b{ color:var(--ink); }
+  .hist-item .amt{ float:right; color:var(--gold); font-weight:800; }
+
+  /* ---------- Instalar / avisos ---------- */
+  .install-box{
+    margin-top:26px; background:var(--bg2); border:1px solid var(--line); border-radius:var(--radius); padding:14px;
+  }
+  .install-box h3{ margin:0 0 6px; font-family:"Barlow Condensed",sans-serif; font-size:20px; letter-spacing:.5px; }
+  .install-box p{ margin:0 0 10px; color:var(--muted); font-size:15px; }
+  #btnInstall{
+    width:100%; min-height:54px; border-radius:12px; border:2px solid var(--gold);
+    background:transparent; color:var(--gold); font-size:18px; font-weight:800;
+  }
+  .install-steps{ display:none; margin-top:10px; color:var(--ink); font-size:15.5px; }
+  .install-steps.show{ display:block; }
+  .install-steps li{ margin-bottom:6px; }
+
+  .toast{
+    position:fixed; left:50%; transform:translateX(-50%) translateY(20px); bottom:96px; z-index:60;
+    background:var(--green); color:#0d1508; font-weight:800; font-size:18px;
+    padding:14px 22px; border-radius:999px; opacity:0; pointer-events:none; transition:all .25s ease;
+    box-shadow:0 8px 30px rgba(0,0,0,.5); text-align:center; max-width:92vw;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (min-width:640px){
+    .brand h1{ font-size:32px; }
+    main{ padding:18px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="mark" aria-hidden="true">🥑</div>
+    <h1>Aguacates <span>Bar</span><small>Mezcales &amp; Tragos · Comandas</small></h1>
+    <div class="conn">
+      <b id="connState" class="on">● En este celular</b>
+      <span id="connSub">Todo queda en el equipo</span>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button id="tabEquipo" class="active" role="tab">EQUIPO</button>
+    <button id="tabBarra" role="tab">BARRA <span class="badge" id="barraBadge">0</span></button>
+    <button id="tabHist" role="tab">HISTORIAL</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ VISTA EQUIPO ============ -->
+  <section class="view active" id="viewEquipo">
+    <p class="who-label">¿Quién toma la orden?</p>
+    <div class="who-row" id="whoRow">
+      <button data-who="Andy">Andy</button>
+      <button data-who="Alexa">Alexa</button>
+      <button data-who="Renata">Renata</button>
+    </div>
+    <div class="who-warn" id="whoWarn">Primero toca tu nombre: Andy, Alexa o Renata.</div>
+
+    <p class="mesa-label" style="margin-top:18px;">Mesa o nombre del cliente</p>
+    <input class="mesa-input" id="mesaInput" type="text" placeholder="Ej. Mesa 4 · o el nombre" autocomplete="off" />
+    <p class="section-note" style="margin-top:12px;">Toca <b>+</b> en cada bebida y ahí mismo aparece el campo para escribir la nota: <i>sin chamoy, extra mango, sin hielo…</i> La nota viaja en la comanda a la barra.</p>
+
+    <div id="menuRoot"></div>
+
+    <div class="sendbar">
+      <div class="tot">
+        <small>Total</small>
+        <b id="grandTotal">$0</b> <span class="cnt" id="itemCount"></span>
+      </div>
+      <button id="btnClear">Borrar</button>
+      <button id="btnSend" disabled>ENVIAR A BARRA</button>
+    </div>
+
+    <div class="install-box">
+      <h3>📲 Déjala instalada en tu pantalla de inicio</h3>
+      <p>Así la abres con un toque, como cualquier app, sin buscar el enlace.</p>
+      <button id="btnInstall">Instalar app en este celular</button>
+      <ol class="install-steps" id="installSteps">
+        <li>En Chrome toca el menú <b>⋮</b> (arriba a la derecha).</li>
+        <li>Toca <b>«Agregar a pantalla principal»</b> o <b>«Instalar app»</b>.</li>
+        <li>Confirma con <b>Agregar / Instalar</b> y listo: queda el ícono de Aguacates Bar.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ VISTA BARRA ============ -->
+  <section class="view" id="viewBarra">
+    <div id="queueRoot"></div>
+  </section>
+
+  <!-- ============ VISTA HISTORIAL ============ -->
+  <section class="view" id="viewHist">
+    <div class="hist-day">
+      <div><small>Entregado hoy</small><span id="histCount">0 comandas</span></div>
+      <b id="histTotal">$0</b>
+    </div>
+    <div id="histRoot"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= MENÚ ================= */
+  // price: null = precio por confirmar (no suma al total)
+  var MENU = [
+    { id:"destacadas", title:"Las de la casa", star:true, note:"Las que se preparan aquí en la barra. Van primero.",
+      groups:[
+        { name:"Micheladas", lines:[
+          { name:"Michelada Mango",    detail:"Litro",     price:100 },
+          { name:"Michelada Mango",    detail:"1/2 litro", price:60 },
+          { name:"Michelada Chamoy",   detail:"Litro",     price:100 },
+          { name:"Michelada Chamoy",   detail:"1/2 litro", price:60 },
+          { name:"Michelada Tamarindo",detail:"Litro",     price:100 },
+          { name:"Michelada Tamarindo",detail:"1/2 litro", price:60 },
+          { name:"Michelada Clamato",  detail:"Litro",     price:100 },
+          { name:"Michelada Clamato",  detail:"1/2 litro", price:60 }
+        ]},
+        { name:"Mojitos", lines:[
+          { name:"Mojito", detail:"Litro",     price:100 },
+          { name:"Mojito", detail:"1/2 litro", price:60 }
+        ]},
+        { name:"Mezcaladas", lines:[
+          { name:"Mezcalada", detail:"Litro",     price:120 },
+          { name:"Mezcalada", detail:"1/2 litro", price:70 }
+        ]},
+        { name:"Golpeaditos", lines:[
+          { name:"Golpeadito", detail:"", price:50 }
+        ]}
+      ]},
+    { id:"cerveza", title:"Cerveza", groups:[ { name:"", lines:[
+      { name:"Corona Light", detail:"", price:40 },
+      { name:"Modelo", detail:"", price:40 },
+      { name:"Victoria", detail:"", price:50 },
+      { name:"New Mix", detail:"Limón – naranja", price:45 },
+      { name:"Ultra", detail:"", price:40 },
+      { name:"Caguama Carta Blanca", detail:"", price:100 },
+      { name:"Strongbow", detail:"Fresa – manzana", price:45 }
+    ]}]},
+    { id:"mezcal", title:"Mezcal", groups:[ { name:"", lines:[
+      { name:"Mezcal Zanjón", detail:"Botella", price:1000 },
+      { name:"Mezcal Jamaica", detail:"Botella", price:500 },
+      { name:"Mezcal Maracuyá", detail:"Botella", price:500 },
+      { name:"Mezcal Tamarindo", detail:"Botella", price:500 },
+      { name:"Mezcal Changunga", detail:"Botella", price:500 },
+      { name:"Crema de coco", detail:"Botella", price:500 }
+    ]}]},
+    { id:"vino", title:"Vino y licores", groups:[ { name:"", lines:[
+      { name:"Rémy Martin", detail:"Botella", price:1600 },
+      { name:"Don Julio 70", detail:"Botella", price:1600 },
+      { name:"Maestro Dobel", detail:"Botella", price:1500 },
+      { name:"Centenario Reposado", detail:"Botella", price:700 },
+      { name:"Centenario Plata", detail:"Botella", price:750 },
+      { name:"Buchanans", detail:"Botella", price:1400 },
+      { name:"Martel", detail:"Botella", price:1500 }
+    ]}]},
+    { id:"sinalcohol", title:"Sin alcohol", groups:[ { name:"", lines:[
+      { name:"Coca", detail:"", price:30 },
+      { name:"Squirt", detail:"", price:30 },
+      { name:"Manzanita", detail:"", price:30 },
+      { name:"Agua mineral", detail:"", price:30 },
+      { name:"Agua natural", detail:"", price:25 },
+      { name:"Volt", detail:"", price:40 }
+    ]}]},
+    { id:"cigarros", title:"Cigarros", groups:[ { name:"", lines:[
+      { name:"Cigarro Rojo", detail:"c/u", price:12 },
+      { name:"Cigarro Ice", detail:"c/u", price:12 },
+      { name:"Vape", detail:"", price:null }
+    ]}]}
+  ];
+
+  // Asignar id único a cada línea
+  var LINES = {}; // id -> line def
+  MENU.forEach(function(sec){
+    sec.groups.forEach(function(g){
+      g.lines.forEach(function(l, i){
+        l.id = sec.id + "-" + (g.name || "g") + "-" + i;
+        LINES[l.id] = l;
+      });
+    });
+  });
+
+  /* ================= ESTADO (solo en memoria, en este celular) ================= */
+  var cart = {};        // lineId -> { qty, note }
+  var who = "";         // Andy | Alexa | Renata
+  var orders = [];      // comandas activas en barra
+  var history = [];     // comandas entregadas
+  var folio = 0;
+
+  var $ = function(id){ return document.getElementById(id); };
+  function money(n){ return "$" + n.toLocaleString("es-MX"); }
+  function nowTime(){
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes();
+    var hh = ((h + 11) % 12) + 1, mm = (m < 10 ? "0" : "") + m;
+    return hh + ":" + mm + (h >= 12 ? " pm" : " am");
+  }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  /* ================= RENDER MENÚ ================= */
+  function renderMenu(){
+    var root = $("menuRoot");
+    var html = "";
+    MENU.forEach(function(sec){
+      html += '<h2 class="section-title' + (sec.star ? " star" : "") + '">' +
+        (sec.star ? "⭐ " : "") + esc(sec.title) + "</h2>";
+      if (sec.note) html += '<p class="section-note">' + esc(sec.note) + "</p>";
+      sec.groups.forEach(function(g){
+        if (g.name) html += '<div class="sub-title">' + esc(g.name) + "</div>";
+        g.lines.forEach(function(l){
+          var c = cart[l.id];
+          var qty = c ? c.qty : 0;
+          var note = c ? c.note : "";
+          html += '<div class="item' + (qty > 0 ? " has" : "") + '" data-line="' + l.id + '">' +
+            '<div class="item-row">' +
+              '<div class="item-info">' +
+                '<div class="item-name">' + esc(l.name) + "</div>" +
+                (l.detail ? '<div class="item-detail">' + esc(l.detail) + "</div>" : "") +
+              "</div>" +
+              (l.price === null
+                ? '<div class="item-price tbc">precio por<br>confirmar</div>'
+                : '<div class="item-price">' + money(l.price) + "</div>") +
+              '<div class="stepper">' +
+                '<button data-act="minus" aria-label="Quitar uno">−</button>' +
+                '<span class="qty">' + qty + "</span>" +
+                '<button class="plus" data-act="plus" aria-label="Agregar uno">+</button>' +
+              "</div>" +
+            "</div>" +
+            '<div class="note-wrap">' +
+              '<input type="text" class="note-input" placeholder="Nota: sin chamoy, extra mango, sin hielo…" value="' + esc(note) + '" />' +
+            "</div>" +
+          "</div>";
+        });
+      });
+    });
+    root.innerHTML = html;
+  }
+
+  function cartTotals(){
+    var total = 0, count = 0, hasTbc = false;
+    Object.keys(cart).forEach(function(id){
+      var c = cart[id], l = LINES[id];
+      if (!c || c.qty <= 0) return;
+      count += c.qty;
+      if (l.price === null) hasTbc = true; else total += l.price * c.qty;
+    });
+    return { total: total, count: count, hasTbc: hasTbc };
+  }
+
+  function refreshSendBar(){
+    var t = cartTotals();
+    $("grandTotal").textContent = money(t.total) + (t.hasTbc ? " + por confirmar" : "");
+    $("itemCount").textContent = t.count > 0 ? "· " + t.count + (t.count === 1 ? " producto" : " productos") : "";
+    $("btnSend").disabled = t.count === 0;
+  }
+
+  function refreshItemRow(id){
+    var el = document.querySelector('.item[data-line="' + id + '"]');
+    if (!el) return;
+    var c = cart[id];
+    var qty = c ? c.qty : 0;
+    el.classList.toggle("has", qty > 0);
+    el.querySelector(".qty").textContent = qty;
+  }
+
+  /* ================= EVENTOS MENÚ ================= */
+  $("menuRoot").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+    var itemEl = e.target.closest(".item");
+    var id = itemEl.getAttribute("data-line");
+    if (!cart[id]) cart[id] = { qty: 0, note: "" };
+    if (btn.getAttribute("data-act") === "plus") cart[id].qty += 1;
+    else cart[id].qty = Math.max(0, cart[id].qty - 1);
+    refreshItemRow(id);
+    refreshSendBar();
+    if (navigator.vibrate) navigator.vibrate(10);
+  });
+  $("menuRoot").addEventListener("input", function(e){
+    if (!e.target.classList.contains("note-input")) return;
+    var itemEl = e.target.closest(".item");
+    var id = itemEl.getAttribute("data-line");
+    if (!cart[id]) cart[id] = { qty: 0, note: "" };
+    cart[id].note = e.target.value;
+  });
+
+  /* ================= QUIÉN ================= */
+  $("whoRow").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-who]");
+    if (!btn) return;
+    who = btn.getAttribute("data-who");
+    Array.prototype.forEach.call($("whoRow").children, function(b){
+      b.classList.toggle("sel", b === btn);
+    });
+    $("whoWarn").classList.remove("show");
+  });
+
+  /* ================= SONIDO + VIBRACIÓN ================= */
+  var audioCtx = null;
+  function beep(){
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      var t = audioCtx.currentTime;
+      [880, 1174].forEach(function(f, i){
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t + i * 0.16);
+        g.gain.exponentialRampToValueAtTime(0.25, t + i * 0.16 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.16 + 0.15);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t + i * 0.16); o.stop(t + i * 0.16 + 0.16);
+      });
+    } catch (err) { /* sin sonido no pasa nada */ }
+    if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+  }
+
+  var toastTimer = null;
+  function toast(msg){
+    var el = $("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+  }
+
+  /* ================= ENVIAR COMANDA ================= */
+  $("btnClear").addEventListener("click", function(){
+    cart = {};
+    renderMenu();
+    refreshSendBar();
+  });
+
+  $("btnSend").addEventListener("click", function(){
+    var t = cartTotals();
+    if (t.count === 0) return;
+    if (!who) {
+      $("whoWarn").classList.add("show");
+      $("whoWarn").scrollIntoView({ behavior: "smooth", block: "center" });
+      if (navigator.vibrate) navigator.vibrate(200);
+      return;
+    }
+    var mesa = $("mesaInput").value.trim();
+    var lines = [];
+    Object.keys(cart).forEach(function(id){
+      var c = cart[id], l = LINES[id];
+      if (c.qty > 0) {
+        lines.push({
+          name: l.name + (l.detail ? " · " + l.detail : ""),
+          qty: c.qty, price: l.price, note: c.note.trim()
+        });
+      }
+    });
+    folio += 1;
+    orders.push({
+      folio: folio, who: who, mesa: mesa, time: nowTime(),
+      lines: lines, total: t.total, hasTbc: t.hasTbc, status: "nuevo"
+    });
+    cart = {};
+    $("mesaInput").value = "";
+    renderMenu();
+    refreshSendBar();
+    renderBarra();
+    beep();
+    toast("Comanda #" + folio + " enviada a la barra ✓");
+  });
+
+  /* ================= BARRA ================= */
+  function renderBarra(){
+    var root = $("queueRoot");
+    var badge = $("barraBadge");
+    badge.textContent = orders.length;
+    badge.classList.toggle("show", orders.length > 0);
+    if (orders.length === 0) {
+      root.innerHTML = '<div class="empty"><b>Sin comandas en cola</b>Cuando el equipo envíe un pedido, aquí aparece al instante.</div>';
+      return;
+    }
+    var html = "";
+    orders.forEach(function(o){
+      html += '<article class="ticket' + (o.status === "prep" ? " prep" : "") + '">' +
+        '<div class="ticket-head">' +
+          '<span class="ticket-folio">#' + o.folio + "</span>" +
+          '<span class="ticket-who">' + esc(o.who) + "</span>" +
+          (o.mesa ? '<span class="ticket-mesa">' + esc(o.mesa) + "</span>" : '<span class="ticket-mesa">Para llevar / barra</span>') +
+          '<span class="ticket-status">' + (o.status === "prep" ? "En preparación" : "Nueva") + "</span>" +
+          '<span class="ticket-time">' + esc(o.time) + "</span>" +
+        "</div>" +
+        "<ul>";
+      o.lines.forEach(function(l){
+        html += "<li>" +
+          '<span class="q">' + l.qty + "×</span>" +
+          '<span class="n">' + esc(l.name) +
+            (l.note ? '<span class="note">✎ ' + esc(l.note) + "</span>" : "") +
+          "</span>" +
+          '<span class="p">' + (l.price === null ? "por confirmar" : money(l.price * l.qty)) + "</span>" +
+        "</li>";
+      });
+      html += "</ul>" +
+        '<div class="ticket-total"><span>Total</span><b>' + money(o.total) + (o.hasTbc ? " + por confirmar" : "") + "</b></div>" +
+        '<div class="ticket-actions">' +
+          (o.status === "nuevo"
+            ? '<button class="btn-prep" data-folio="' + o.folio + '" data-act="prep">🍹 En preparación</button>'
+            : "") +
+          '<button class="btn-done" data-folio="' + o.folio + '" data-act="done">✓ Listo / Entregar</button>' +
+        "</div>" +
+      "</article>";
+    });
+    root.innerHTML = html;
+  }
+
+  $("queueRoot").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-folio]");
+    if (!btn) return;
+    var f = parseInt(btn.getAttribute("data-folio"), 10);
+    var act = btn.getAttribute("data-act");
+    var idx = -1;
+    orders.forEach(function(o, i){ if (o.folio === f) idx = i; });
+    if (idx < 0) return;
+    if (act === "prep") {
+      orders[idx].status = "prep";
+      renderBarra();
+    } else if (act === "done") {
+      var done = orders.splice(idx, 1)[0];
+      history.unshift(done);
+      renderBarra();
+      renderHist();
+      toast("Comanda #" + f + " entregada ✓");
+      if (navigator.vibrate) navigator.vibrate(60);
+    }
+  });
+
+  /* ================= HISTORIAL ================= */
+  function renderHist(){
+    var total = 0;
+    history.forEach(function(o){ total += o.total; });
+    $("histTotal").textContent = money(total);
+    $("histCount").textContent = history.length + (history.length === 1 ? " comanda" : " comandas");
+    var root = $("histRoot");
+    if (history.length === 0) {
+      root.innerHTML = '<div class="empty"><b>Todavía nada entregado</b>Las comandas listas van cayendo aquí.</div>';
+      return;
+    }
+    var html = "";
+    history.forEach(function(o){
+      var resumen = o.lines.map(function(l){ return l.qty + "× " + l.name; }).join(", ");
+      html += '<div class="hist-item"><span class="amt">' + money(o.total) + (o.hasTbc ? "+pc" : "") + "</span>" +
+        "<b>#" + o.folio + "</b> · " + esc(o.who) + (o.mesa ? " · " + esc(o.mesa) : "") +
+        " · " + esc(o.time) + "<br>" + esc(resumen) + "</div>";
+    });
+    root.innerHTML = html;
+  }
+
+  /* ================= TABS ================= */
+  function showView(name){
+    ["Equipo", "Barra", "Hist"].forEach(function(k){
+      $("tab" + k).classList.toggle("active", k === name);
+      $("view" + k).classList.toggle("active", k === name);
+    });
+    window.scrollTo({ top: 0 });
+  }
+  $("tabEquipo").addEventListener("click", function(){ showView("Equipo"); });
+  $("tabBarra").addEventListener("click", function(){ showView("Barra"); });
+  $("tabHist").addEventListener("click", function(){ showView("Hist"); });
+
+  /* ================= CONEXIÓN (solo aviso visual) ================= */
+  function refreshConn(){
+    var on = navigator.onLine;
+    var el = $("connState");
+    el.textContent = on ? "● En línea" : "● Sin internet — sigue funcionando";
+    el.className = on ? "on" : "off";
+    $("connSub").textContent = "Todo queda en este celular";
+  }
+  window.addEventListener("online", refreshConn);
+  window.addEventListener("offline", refreshConn);
+
+  /* ================= PWA: manifest + instalación ================= */
+  // Manifest generado al vuelo: la página es un solo archivo, lista para Chrome.
+  try {
+    var iconSvg = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0b100d"/><ellipse cx="50" cy="54" rx="30" ry="36" fill="#7fb069"/><ellipse cx="50" cy="56" rx="20" ry="26" fill="#d7e8b0"/><circle cx="50" cy="62" r="10" fill="#8a5a2b"/></svg>');
+    var manifest = {
+      name: "Comandas Aguacates Bar",
+      short_name: "Comandas",
+      start_url: ".",
+      scope: ".",
+      display: "standalone",
+      background_color: "#0b100d",
+      theme_color: "#0b100d",
+      icons: [
+        { src: iconSvg, sizes: "any", type: "image/svg+xml", purpose: "any" }
+      ]
+    };
+    var mBlob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+    var mLink = document.createElement("link");
+    mLink.rel = "manifest";
+    mLink.href = URL.createObjectURL(mBlob);
+    document.head.appendChild(mLink);
+  } catch (err) { /* si el navegador no lo acepta, la página funciona igual */ }
+
+  var deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+  $("btnInstall").addEventListener("click", function(){
+    if (deferredPrompt) {
+      deferredPrompt["prompt"]();
+      deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
+    } else {
+      $("installSteps").classList.toggle("show");
+    }
+  });
+
+  /* ================= INICIO ================= */
+  renderMenu();
+  refreshSendBar();
+  renderBarra();
+  renderHist();
+  refreshConn();
+})();
+</script>
+</body>
+</html>
