@@ -112,11 +112,6 @@
   .hist-item .m{color:var(--muted);font-size:13px}
   .hist-item b.t{color:var(--gold);white-space:nowrap}
 
-  details.cfg{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:6px 14px;margin-top:22px}
-  details.cfg summary{padding:12px 0;font-weight:800;cursor:pointer;min-height:44px}
-  details.cfg p,details.cfg li{color:var(--muted);font-size:14px;line-height:1.55}
-  details.cfg code{background:#000;color:var(--lime);padding:1px 6px;border-radius:6px;font-size:13px}
-  #btnInstall{width:100%;margin-top:16px;background:var(--card2);color:var(--txt);border:2px solid var(--lime-d);border-radius:14px;font-weight:800;font-size:17px;padding:15px}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:var(--lime);color:#10240f;font-weight:900;padding:13px 20px;border-radius:999px;font-size:16px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;max-width:92vw;text-align:center}
   .toast.show{opacity:1}
   .hidden{display:none!important}
@@ -160,14 +155,6 @@
 
     <div id="menu"></div>
 
-    <button id="btnInstall" type="button">📲 Instalar app en este celular</button>
-
-    <details class="cfg">
-      <summary>Conexión en vivo (Firebase)</summary>
-      <p>Esta versión ya trae pegada la configuración real del proyecto <b>aura-id</b> (<code>aura-id-33652</code>) al inicio del código, en la constante <code>firebaseConfig</code>. Las comandas se guardan en Firestore, en la colección <code>comandas</code>, y llegan en vivo a todos los celulares que abran esta misma página.</p>
-      <p>Si un día cambia el proyecto, la configuración se pega en un solo lugar: busca <code>firebaseConfig</code> al principio del &lt;script&gt; de este archivo y reemplaza esos valores por los de Firebase → Configuración del proyecto → Tus apps → Web.</p>
-      <p>Sin señal, la comanda se guarda primero en este celular y se sube sola cuando vuelve la conexión, sin duplicarse. Arriba verás “SIN SUBIR” mientras haya comandas pendientes.</p>
-    </details>
   </section>
 
   <!-- ============ VISTA BARRA ============ -->
@@ -424,7 +411,7 @@ function setConn(){
   connPend.textContent = pend ? pend + " SIN SUBIR" : "";
   if (!fbReady) { dot.className = "dot"; connTxt.textContent = "Sin conexión en vivo: las comandas se quedan en este celular."; return; }
   if (!navigator.onLine) { dot.className = "dot wait"; connTxt.textContent = "Sin señal: guardando en este celular, se sube al volver."; return; }
-  dot.className = "dot ok"; connTxt.textContent = "En vivo · proyecto aura-id · colección comandas";
+  dot.className = "dot ok"; connTxt.textContent = "En vivo";
 }
 window.addEventListener("online", function(){ setConn(); flushOutbox(); });
 window.addEventListener("offline", setConn);
@@ -508,7 +495,7 @@ function startLive(){
     if (nuevos > 0) { beep(); if (view !== "barra") showBadge(nuevos); }
     renderBarra(); setConn();
   }, function(err){
-    dot.className = "dot"; connTxt.textContent = "Error de conexión en vivo. Revisa la configuración de Firebase.";
+    dot.className = "dot"; connTxt.textContent = "Error de conexión en vivo. Avisa a Yoshio.";
     renderBarra();
   });
 }
@@ -589,17 +576,7 @@ function toast(msg){
   toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2600);
 }
 
-/* ---------------- INSTALAR (PWA) ---------------- */
-var deferredPrompt = null;
-window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferredPrompt = e; });
-document.getElementById("btnInstall").addEventListener("click", function(){
-  if (deferredPrompt) {
-    deferredPrompt["prompt"]();
-    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
-  } else {
-    toast("En Chrome: menú ⋮ → “Agregar a pantalla de inicio” o “Instalar app”");
-  }
-});
+/* ---------------- MANIFEST (agregar a pantalla de inicio desde el menú del navegador) ---------------- */
 try {
   var man = { name:"Comandas Aguacates Bar", short_name:"Comandas", start_url:".", display:"standalone",
               background_color:"#0b1510", theme_color:"#0b1510",
